@@ -216,7 +216,7 @@ GameObject:
   - component: {fileID: 1153735549}
   - component: {fileID: 1153735551}
   m_Layer: 0
-  m_Name: New Sprite
+  m_Name: Ground
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -262,7 +262,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 0
   m_Sprite: {fileID: 21300000, guid: 0ac5d79139a6f714e9b28b66d254db53, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.27446845, g: 0.23451406, b: 0.3207547, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 2
@@ -326,7 +326,7 @@ GameObject:
   - component: {fileID: 1450002179}
   - component: {fileID: 1450002183}
   m_Layer: 0
-  m_Name: New Sprite (1)
+  m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -359,7 +359,7 @@ BoxCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: -0.013945699, y: 0.013947442}
+  m_Offset: {x: -0.002273202, y: -0.0035613477}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -370,7 +370,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.61648774, y: 0.6722734}
+  m_Size: {x: 0.63983274, y: 0.63725585}
   m_EdgeRadius: 0
 --- !u!212 &1450002181
 SpriteRenderer:
@@ -470,7 +470,7 @@ GameObject:
   - component: {fileID: 1852615488}
   - component: {fileID: 1852615487}
   m_Layer: 0
-  m_Name: New Sprite (2)
+  m_Name: Phase Wall
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -560,7 +560,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1852615486}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 3.78, y: 8.12, z: -151.02441}
+  m_LocalPosition: {x: 5.06, y: 7.97, z: -151.02441}
   m_LocalScale: {x: 1.3302687, y: 14.811242, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
