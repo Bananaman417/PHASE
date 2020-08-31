@@ -12,17 +12,22 @@ public class Controller : MonoBehaviour {
   public LayerMask groundLayer;
   public LayerMask waterLayer;
 
-  public SpriteRenderer sr;
   public GameObject Legs;
   public GameObject Wheels;
 
   public Mode mode = Mode.Wheels;
   private Animator moveAnimator;
-  private SpriteRenderer moveSR;
+  private SpriteRenderer bodySR;
+  private SpriteRenderer moveSR1;
+  private SpriteRenderer moveSR2;
   public  Animator wheelsAnimator;
+  public SpriteRenderer bodyWheelSR;
+  public SpriteRenderer wheelsSR1;
+  public SpriteRenderer wheelsSR2;
   public  Animator legsAnimator;
-  public SpriteRenderer wheelsSR;
-  public SpriteRenderer legsSR;
+  public SpriteRenderer bodyLegsSR;
+  public SpriteRenderer legsSR1;
+  public SpriteRenderer legsSR2;
 
   // Start is called before the first frame update
   void Start() {
@@ -35,20 +40,16 @@ public class Controller : MonoBehaviour {
     rb.velocity = new Vector2(moveinput * speed, rb.velocity.y);
 
     if (moveinput < 0) {
-      sr.flipX = true;
-      if (moveSR != null) moveSR.flipX = true;
-      if (moveAnimator != null) {
-        moveAnimator.Play("Move");
-        moveAnimator.speed = 1;
-      }
+      if (bodySR != null) bodySR.flipX = true;
+      if (moveSR1 != null) moveSR1.flipX = true;
+      if (moveSR2 != null) moveSR2.flipX = true;
+      if (moveAnimator != null) moveAnimator.Play("MoveL");
     }
     else if (moveinput > 0) {
-      sr.flipX = false;
-      if (moveSR != null) moveSR.flipX = false;
-      if (moveAnimator != null) {
-        moveAnimator.Play("Move");
-        moveAnimator.speed = -1;
-      }
+      if (bodySR != null) bodySR.flipX = false;
+      if (moveSR1 != null) moveSR1.flipX = false;
+      if (moveSR2 != null) moveSR2.flipX = false;
+      if (moveAnimator != null) moveAnimator.Play("MoveR");
     }
     else {
       if (moveAnimator != null) {
@@ -64,6 +65,10 @@ public class Controller : MonoBehaviour {
       rb.velocity += Vector2.up * jumpforce;
       isGrounded = false;
     }
+
+
+    if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeMode(Mode.Wheels);
+    if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeMode(Mode.Legs);
 
   }
 
@@ -90,14 +95,18 @@ public class Controller : MonoBehaviour {
     if (mode == Mode.Wheels) {
       Wheels.SetActive(true);
       Legs.SetActive(false);
+      bodySR = bodyWheelSR;
       moveAnimator = wheelsAnimator;
-      moveSR = wheelsSR;
+      moveSR1 = wheelsSR1;
+      moveSR2 = wheelsSR2;
     }
     else if (mode == Mode.Legs) {
       Wheels.SetActive(false);
       Legs.SetActive(true);
+      bodySR = bodyLegsSR;
       moveAnimator = legsAnimator;
-      moveSR = legsSR;
+      moveSR1 = legsSR1;
+      moveSR2 = legsSR2;
     }
   }
 }
