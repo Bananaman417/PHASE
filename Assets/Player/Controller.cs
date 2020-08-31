@@ -28,6 +28,7 @@ public class Controller : MonoBehaviour {
   public SpriteRenderer bodyLegsSR;
   public SpriteRenderer legsSR1;
   public SpriteRenderer legsSR2;
+  public GameObject ElectroShock;
 
   // Start is called before the first frame update
   void Start() {
@@ -36,6 +37,7 @@ public class Controller : MonoBehaviour {
   }
 
   void FixedUpdate() {
+    if (timeInWater > 1) return; // Stop the movements
     moveinput = Input.GetAxis("Horizontal");
     rb.velocity = new Vector2(moveinput * speed, rb.velocity.y);
 
@@ -61,6 +63,17 @@ public class Controller : MonoBehaviour {
 
 
   void Update() {
+    if (inWater) {
+      timeInWater += Time.deltaTime;
+    }
+
+    ElectroShock.SetActive(timeInWater > 1);
+    if (timeInWater > 5) // do some restart
+      ;
+
+    if (timeInWater > 1) return; // Stop the movements
+
+
     if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
       rb.velocity += Vector2.up * jumpforce;
       isGrounded = false;
@@ -71,6 +84,9 @@ public class Controller : MonoBehaviour {
     if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeMode(Mode.Legs);
 
   }
+
+  bool inWater = false;
+  float timeInWater = 0;
 
   private void OnCollisionEnter2D(Collision2D collision) {
     if ((groundLayer & (1 << collision.collider.gameObject.layer)) != 0) {
@@ -86,7 +102,14 @@ public class Controller : MonoBehaviour {
       isGrounded = true;
     }
     if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
-      Debug.Log("Water");
+      inWater = true;
+    }
+  }
+
+  private void OnTriggerExit2D(Collider2D collision) {
+    if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
+      inWater = false;
+      timeInWater = 0;
     }
   }
 
