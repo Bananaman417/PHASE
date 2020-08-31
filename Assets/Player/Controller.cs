@@ -1,6 +1,4 @@
-﻿using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
+﻿using UnityEngine;
 
 public class Controller : MonoBehaviour {
   public float speed;
@@ -10,6 +8,7 @@ public class Controller : MonoBehaviour {
   public bool isGrounded;
 
   public LayerMask groundLayer;
+  public LayerMask waterLayer;
 
   // Start is called before the first frame update
   void Start() {
@@ -35,7 +34,22 @@ public class Controller : MonoBehaviour {
     if ((groundLayer & (1 << collision.collider.gameObject.layer)) != 0) {
       isGrounded = true;
     }
+    if ((waterLayer & (1 << collision.collider.gameObject.layer)) != 0) {
+      Debug.Log("In water");
+    }
   }
+
+
+  private void OnTriggerEnter2D(Collider2D collision) {
+    if ((groundLayer & (1 << collision.gameObject.layer)) != 0) {
+      isGrounded = true;
+    }
+    if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
+      Debug.Log("In water");
+    }
+  }
+
+
 
 }
 
