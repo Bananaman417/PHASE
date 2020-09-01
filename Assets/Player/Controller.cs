@@ -48,12 +48,14 @@ public class Controller : MonoBehaviour {
       if (moveSR1 != null) moveSR1.flipX = true;
       if (moveSR2 != null) moveSR2.flipX = true;
       if (moveAnimator != null) moveAnimator.Play("MoveL");
+      if (mode == Mode.Hook) hookSR.flipX = true;
     }
     else if (moveinput > 0) {
       if (bodySR != null) bodySR.flipX = false;
       if (moveSR1 != null) moveSR1.flipX = false;
       if (moveSR2 != null) moveSR2.flipX = false;
       if (moveAnimator != null) moveAnimator.Play("MoveR");
+      if (mode == Mode.Hook) hookSR.flipX = false;
     }
     else {
       if (moveAnimator != null) {
@@ -146,7 +148,7 @@ public class Controller : MonoBehaviour {
       moveSR2 = legsSR2;
     }
     else if (mode == Mode.Hook) {
-      Wheels.SetActive(false);
+      Wheels.SetActive(true);
       Legs.SetActive(false);
       Hook.SetActive(true);
       bodySR = bodyWheelSR;
