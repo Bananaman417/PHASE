@@ -13,6 +13,12 @@ public class Controller : MonoBehaviour {
 
   public LayerMask groundLayer;
   public LayerMask waterLayer;
+  public LayerMask pillRed;
+  public LayerMask Red;
+  public LayerMask pillGreen;
+  public LayerMask Green;
+  public LayerMask pillBlue;
+  public LayerMask Blue;
 
   public GameObject Legs;
   public GameObject Wheels;
