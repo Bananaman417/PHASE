@@ -132,16 +132,37 @@ MonoBehaviour:
   speed: 4
   jumpforce: 5
   isGrounded: 0
+  hooking: 0
+  goingleft: 0
   groundLayer:
     serializedVersion: 2
     m_Bits: 256
   waterLayer:
     serializedVersion: 2
     m_Bits: 16
+  pillRed:
+    serializedVersion: 2
+    m_Bits: 131072
+  wallRed:
+    serializedVersion: 2
+    m_Bits: 16384
+  pillGreen:
+    serializedVersion: 2
+    m_Bits: 524288
+  wallGreen:
+    serializedVersion: 2
+    m_Bits: 65536
+  pillBlue:
+    serializedVersion: 2
+    m_Bits: 262144
+  wallBlue:
+    serializedVersion: 2
+    m_Bits: 32768
+  phase: 0
+  mode: 0
   Legs: {fileID: 1368386702144264866}
   Wheels: {fileID: 1368386703480581081}
   Hook: {fileID: 926235794464363482}
-  mode: 0
   wheelsAnimator: {fileID: 1368386703480581083}
   bodyWheelSR: {fileID: 8581649621619021625}
   wheelsSR1: {fileID: 1368386702544119379}
@@ -151,7 +172,7 @@ MonoBehaviour:
   legsSR1: {fileID: 4180218930181669850}
   legsSR2: {fileID: 713754498187940503}
   ElectroShock: {fileID: 9215059847030387506}
-  hookSR: {fileID: 3623880590476790690}
+  zzz: 10
 --- !u!50 &1368386701881944469
 Rigidbody2D:
   serializedVersion: 4

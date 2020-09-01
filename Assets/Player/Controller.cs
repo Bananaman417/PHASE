@@ -14,17 +14,17 @@ public class Controller : MonoBehaviour {
   public LayerMask groundLayer;
   public LayerMask waterLayer;
   public LayerMask pillRed;
-  public LayerMask Red;
+  public LayerMask wallRed;
   public LayerMask pillGreen;
-  public LayerMask Green;
+  public LayerMask wallGreen;
   public LayerMask pillBlue;
-  public LayerMask Blue;
+  public LayerMask wallBlue;
 
+  public Phase phase = Phase.None;
+  public Mode mode = Mode.Wheels;
   public GameObject Legs;
   public GameObject Wheels;
   public GameObject Hook;
-
-  public Mode mode = Mode.Wheels;
   private Animator moveAnimator;
   private SpriteRenderer bodySR;
   private SpriteRenderer moveSR1;
@@ -220,6 +220,26 @@ public class Controller : MonoBehaviour {
     if ((waterLayer & (1 << collision.collider.gameObject.layer)) != 0) {
       Debug.Log("Water");
     }
+
+
+    if ((pillRed & (1 << collision.collider.gameObject.layer)) != 0) {
+      phase = Phase.Red;
+      bodySR.color = new Color32(255, 100, 100, 255);
+      SetLayer(gameObject, 14); // Phase Red
+      GameObject.Destroy(collision.collider.gameObject);
+    }
+    else if ((pillBlue & (1 << collision.collider.gameObject.layer)) != 0) {
+      phase = Phase.Blue;
+      bodySR.color = new Color32(100, 100, 255, 255);
+      SetLayer(gameObject, 15); // Phase Blue
+      GameObject.Destroy(collision.collider.gameObject);
+    }
+    else if ((pillGreen & (1 << collision.collider.gameObject.layer)) != 0) {
+      phase = Phase.Green;
+      bodySR.color = new Color32(100, 255, 100, 255);
+      SetLayer(gameObject, 16); // Phase Green
+      GameObject.Destroy(collision.collider.gameObject);
+    }
   }
 
   private void OnTriggerEnter2D(Collider2D collision) {
@@ -268,6 +288,17 @@ public class Controller : MonoBehaviour {
       moveSR2 = wheelsSR2;
     }
   }
+
+  void SetLayer(GameObject obj, int newLayer) {
+    obj.layer = newLayer;
+
+    foreach (Transform child in obj.transform) {
+      SetLayer(child.gameObject, newLayer);
+    }
+  }
+
+
 }
 
 public enum Mode { Wheels, Legs, Hook };
+public enum Phase { None, Red, Green, Blue };
