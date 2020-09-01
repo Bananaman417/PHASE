@@ -96,13 +96,7 @@ public class Controller : MonoBehaviour {
         // Raycast to find the ceil
         RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up + (goingleft ? Vector2.left : Vector2.right), 10, groundLayer);
         Debug.Log(hit.point.ToString() + " d=" + hit.distance);
-        // Start elongating anim until we reach the spot
-        // If no spot, then go back after a while
-        // If spot, move player on the line, and swing, then leave the hook, and fall down
-        // Make movements impossible while hooking
-
-        StartCoroutine(HookLaunch(hit.distance));
-
+        StartCoroutine(HookLaunch(hit.point, hit.distance));
       }
     }
 
@@ -112,23 +106,26 @@ public class Controller : MonoBehaviour {
 
   }
 
-  public float hf = 1;
+  float hookscale = 0.3909113f;
 
-  IEnumerator HookLaunch(float dist) {
+  IEnumerator HookLaunch(Vector2 hit, float dist) {
+    rb.velocity = Vector3.zero;
     bool notgood = false;
     if (dist == 0) {
       dist = 8f;
       notgood = true;
     }
 
+    // Start elongating anim until we reach the spot
     float hooklen = .2f;
-    while (hooklen < dist * hf) {
+    while (hooklen < dist * hookscale) {
       hooklen += 2 * Time.fixedDeltaTime;
       Hook.transform.localScale = new Vector3(hooklen, .5f, 1);
       yield return null;
     }
 
     if (notgood) {
+      // If no spot, then go back and stop
       while (hooklen > .2) {
         hooklen -= 3 * Time.fixedDeltaTime;
         Hook.transform.localScale = new Vector3(hooklen, .5f, 1);
@@ -136,11 +133,76 @@ public class Controller : MonoBehaviour {
       }
       Hook.transform.localScale = new Vector3(.2f, .5f, 1);
     }
+    else {
+      // Move player on the line
+      rb.gravityScale = 0;
+      float amount = dist / 3;
 
-    yield return null;
+      Vector2 orig = transform.position;
+      Vector2 dest = orig;
+      if (goingleft) {
+        dest += (Vector2.up + Vector2.left).normalized * amount;
+      }
+      else {
+        dest += (Vector2.up + Vector2.right).normalized * amount;
+      }
+
+      float reducedlength = hookscale *  dist * 2 / 3;
+
+      float pos = 0;
+      while (pos < 1) {
+        pos += (1 + pos) * (1 + pos) * (1 + pos) * (1 + pos) * Time.deltaTime;
+        transform.position = pos * dest + (1 - pos) * orig;
+        Hook.transform.localScale = new Vector3(hooklen * (1-pos) + reducedlength * pos, .5f, 1);
+        yield return null;
+      }
+
+      // Swing
+      if (goingleft) {
+        pos = 10;
+        while (pos > 0) {
+          if (pos > 5)
+            pos -= 2 * (4 + pos / 2) * Time.deltaTime;
+          else
+            pos -= 2 * (7.5f - pos / 2) * Time.deltaTime;
+          float x = hit.x + Mathf.Sin(9 * (pos - 5) * Mathf.Deg2Rad) * dist * 2 / 3;
+          float y = hit.y - Mathf.Cos(9 * (pos - 5) * Mathf.Deg2Rad) * dist * 2 / 3;
+          transform.position = new Vector3(x, y, 0);
+          Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + pos * 9);
+          yield return null;
+        }
+      }
+      else {
+        pos = 0;
+        while (pos < 10) {
+          if (pos < 5)
+            pos += 2 * (4 + pos / 2) * Time.deltaTime;
+          else
+            pos += 2 * (7.5f - pos / 2) * Time.deltaTime;
+          float x = hit.x + Mathf.Sin(9 * (pos - 5) * Mathf.Deg2Rad) * dist * 2 / 3;
+          float y = hit.y - Mathf.Cos(9 * (pos - 5) * Mathf.Deg2Rad) * dist * 2 / 3;
+          transform.position = new Vector3(x, y, 0);
+          Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + pos * 9);
+          yield return null;
+        }
+      }
+
+      // Leave the hook, and fall down
+      yield return new WaitForSeconds(.05f);
+      rb.gravityScale = 1;
+      pos = 0;
+      while (pos < 1) {
+        pos += (1 + pos) * (1 + pos) * (1 + pos) * (1 + pos) * Time.deltaTime;
+        Hook.transform.localScale = new Vector3(reducedlength * (1 - pos) + .2f * pos, .5f, 1);
+        yield return null;
+      }
+      Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + (goingleft ? 90 : 0));
+      Hook.transform.localScale = new Vector3(.2f, .5f, 1);
+    }
     hooking = false;
   }
 
+  public float zzz = 10;
 
   bool inWater = false;
   float timeInWater = 0;
