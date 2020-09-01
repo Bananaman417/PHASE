@@ -8,6 +8,8 @@ public class Controller : MonoBehaviour {
   private float moveinput;
   private Rigidbody2D rb;
   public bool isGrounded;
+  public bool hooking;
+  public bool goingleft;
 
   public LayerMask groundLayer;
   public LayerMask waterLayer;
@@ -30,16 +32,17 @@ public class Controller : MonoBehaviour {
   public SpriteRenderer legsSR1;
   public SpriteRenderer legsSR2;
   public GameObject ElectroShock;
-  public SpriteRenderer hookSR;
 
   // Start is called before the first frame update
   void Start() {
     rb = GetComponent<Rigidbody2D>();
     ChangeMode(Mode.Wheels);
+    hooking = false;
+    goingleft = false;
   }
 
   void FixedUpdate() {
-    if (timeInWater > 1) return; // Stop the movements
+    if (timeInWater > 1 || hooking) return; // Stop the movements
     moveinput = Input.GetAxis("Horizontal");
     rb.velocity = new Vector2(moveinput * speed, rb.velocity.y);
 
@@ -48,14 +51,16 @@ public class Controller : MonoBehaviour {
       if (moveSR1 != null) moveSR1.flipX = true;
       if (moveSR2 != null) moveSR2.flipX = true;
       if (moveAnimator != null) moveAnimator.Play("MoveL");
-      if (mode == Mode.Hook) hookSR.flipX = true;
+      if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + 90);
+      goingleft = true;
     }
     else if (moveinput > 0) {
       if (bodySR != null) bodySR.flipX = false;
       if (moveSR1 != null) moveSR1.flipX = false;
       if (moveSR2 != null) moveSR2.flipX = false;
       if (moveAnimator != null) moveAnimator.Play("MoveR");
-      if (mode == Mode.Hook) hookSR.flipX = false;
+      if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45);
+      goingleft = false;
     }
     else {
       if (moveAnimator != null) {
@@ -77,6 +82,8 @@ public class Controller : MonoBehaviour {
 
     if (timeInWater > 1) return; // Stop the movements
 
+    if (hooking) return;
+
     if (mode == Mode.Legs) {
       if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
         rb.velocity += Vector2.up * jumpforce;
@@ -85,11 +92,17 @@ public class Controller : MonoBehaviour {
     }
     else if (mode == Mode.Hook) {
       if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
+        hooking = true;
         // Raycast to find the ceil
+        RaycastHit2D hit = Physics2D.Raycast(transform.position, Vector2.up + (goingleft ? Vector2.left : Vector2.right), 10, groundLayer);
+        Debug.Log(hit.point.ToString() + " d=" + hit.distance);
         // Start elongating anim until we reach the spot
         // If no spot, then go back after a while
         // If spot, move player on the line, and swing, then leave the hook, and fall down
         // Make movements impossible while hooking
+
+        StartCoroutine(HookLaunch(hit.distance));
+
       }
     }
 
@@ -98,6 +111,36 @@ public class Controller : MonoBehaviour {
     if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeMode(Mode.Hook);
 
   }
+
+  public float hf = 1;
+
+  IEnumerator HookLaunch(float dist) {
+    bool notgood = false;
+    if (dist == 0) {
+      dist = 8f;
+      notgood = true;
+    }
+
+    float hooklen = .2f;
+    while (hooklen < dist * hf) {
+      hooklen += 2 * Time.fixedDeltaTime;
+      Hook.transform.localScale = new Vector3(hooklen, .5f, 1);
+      yield return null;
+    }
+
+    if (notgood) {
+      while (hooklen > .2) {
+        hooklen -= 3 * Time.fixedDeltaTime;
+        Hook.transform.localScale = new Vector3(hooklen, .5f, 1);
+        yield return null;
+      }
+      Hook.transform.localScale = new Vector3(.2f, .5f, 1);
+    }
+
+    yield return null;
+    hooking = false;
+  }
+
 
   bool inWater = false;
   float timeInWater = 0;
