@@ -14,6 +14,7 @@ public class Controller : MonoBehaviour {
 
   public GameObject Legs;
   public GameObject Wheels;
+  public GameObject Hook;
 
   public Mode mode = Mode.Wheels;
   private Animator moveAnimator;
@@ -29,6 +30,7 @@ public class Controller : MonoBehaviour {
   public SpriteRenderer legsSR1;
   public SpriteRenderer legsSR2;
   public GameObject ElectroShock;
+  public SpriteRenderer hookSR;
 
   // Start is called before the first frame update
   void Start() {
@@ -73,15 +75,25 @@ public class Controller : MonoBehaviour {
 
     if (timeInWater > 1) return; // Stop the movements
 
-
-    if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
-      rb.velocity += Vector2.up * jumpforce;
-      isGrounded = false;
+    if (mode == Mode.Legs) {
+      if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
+        rb.velocity += Vector2.up * jumpforce;
+        isGrounded = false;
+      }
     }
-
+    else if (mode == Mode.Hook) {
+      if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
+        // Raycast to find the ceil
+        // Start elongating anim until we reach the spot
+        // If no spot, then go back after a while
+        // If spot, move player on the line, and swing, then leave the hook, and fall down
+        // Make movements impossible while hooking
+      }
+    }
 
     if (Input.GetKeyDown(KeyCode.Alpha1)) ChangeMode(Mode.Wheels);
     if (Input.GetKeyDown(KeyCode.Alpha2)) ChangeMode(Mode.Legs);
+    if (Input.GetKeyDown(KeyCode.Alpha3)) ChangeMode(Mode.Hook);
 
   }
 
@@ -118,6 +130,7 @@ public class Controller : MonoBehaviour {
     if (mode == Mode.Wheels) {
       Wheels.SetActive(true);
       Legs.SetActive(false);
+      Hook.SetActive(false);
       bodySR = bodyWheelSR;
       moveAnimator = wheelsAnimator;
       moveSR1 = wheelsSR1;
@@ -126,12 +139,22 @@ public class Controller : MonoBehaviour {
     else if (mode == Mode.Legs) {
       Wheels.SetActive(false);
       Legs.SetActive(true);
+      Hook.SetActive(false);
       bodySR = bodyLegsSR;
       moveAnimator = legsAnimator;
       moveSR1 = legsSR1;
       moveSR2 = legsSR2;
     }
+    else if (mode == Mode.Hook) {
+      Wheels.SetActive(false);
+      Legs.SetActive(false);
+      Hook.SetActive(true);
+      bodySR = bodyWheelSR;
+      moveAnimator = wheelsAnimator;
+      moveSR1 = wheelsSR1;
+      moveSR2 = wheelsSR2;
+    }
   }
 }
 
-public enum Mode { Wheels, Legs, Fins };
+public enum Mode { Wheels, Legs, Hook };
