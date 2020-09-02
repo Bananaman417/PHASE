@@ -19,6 +19,9 @@ public class Controller : MonoBehaviour {
   public LayerMask wallGreen;
   public LayerMask pillBlue;
   public LayerMask wallBlue;
+  public LayerMask itemWheels;
+  public LayerMask itemLegs;
+  public LayerMask itemHook;
 
   public Phase phase = Phase.None;
   public Mode mode = Mode.Wheels;
@@ -112,7 +115,7 @@ public class Controller : MonoBehaviour {
 
   }
 
-  float hookscale = 0.3909113f;
+  readonly float hookscale = 0.3909113f;
 
   IEnumerator HookLaunch(Vector2 hit, float dist) {
     rb.velocity = Vector3.zero;
@@ -208,8 +211,6 @@ public class Controller : MonoBehaviour {
     hooking = false;
   }
 
-  public float zzz = 10;
-
   bool inWater = false;
   float timeInWater = 0;
 
@@ -238,6 +239,18 @@ public class Controller : MonoBehaviour {
       phase = Phase.Green;
       bodySR.color = new Color32(100, 255, 100, 255);
       SetLayer(gameObject, 16); // Phase Green
+      GameObject.Destroy(collision.collider.gameObject);
+    }
+    else if ((itemWheels & (1 << collision.collider.gameObject.layer)) != 0) {
+      ChangeMode(Mode.Wheels);
+      GameObject.Destroy(collision.collider.gameObject);
+    }
+    else if ((itemLegs & (1 << collision.collider.gameObject.layer)) != 0) {
+      ChangeMode(Mode.Legs);
+      GameObject.Destroy(collision.collider.gameObject);
+    }
+    else if ((itemHook & (1 << collision.collider.gameObject.layer)) != 0) {
+      ChangeMode(Mode.Hook);
       GameObject.Destroy(collision.collider.gameObject);
     }
   }
