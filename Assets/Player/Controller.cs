@@ -10,6 +10,7 @@ public class Controller : MonoBehaviour {
   public bool isGrounded;
   public bool hooking;
   public bool goingleft;
+  Camera cam;
 
   public LayerMask groundLayer;
   public LayerMask waterLayer;
@@ -42,16 +43,23 @@ public class Controller : MonoBehaviour {
   public SpriteRenderer legsSR2;
   public GameObject ElectroShock;
 
+  public Level[] Levels;
+  public int currentLevel = 0;
+  bool startingLevel = false;
+
   // Start is called before the first frame update
   void Start() {
+    cam = Camera.main;
     rb = GetComponent<Rigidbody2D>();
     ChangeMode(Mode.Wheels);
     hooking = false;
     goingleft = false;
+    currentLevel = 0;
+    MoveToLevelStart();
   }
 
   void FixedUpdate() {
-    if (timeInWater > 1 || hooking) return; // Stop the movements
+    if (timeInWater > 1 || hooking || startingLevel) return; // Stop the movements
     moveinput = Input.GetAxis("Horizontal");
     rb.velocity = new Vector2(moveinput * speed, rb.velocity.y);
 
@@ -81,17 +89,18 @@ public class Controller : MonoBehaviour {
 
 
   void Update() {
+    cam.transform.rotation = Quaternion.identity;
     if (inWater) {
       timeInWater += Time.deltaTime;
     }
 
     ElectroShock.SetActive(timeInWater > 1);
-    if (timeInWater > 5) // do some restart
-      ;
+    if (timeInWater > 5) { // do some restart
+      RestartLevel();
+      return;
+    }
 
-    if (timeInWater > 1) return; // Stop the movements
-
-    if (hooking) return;
+    if (timeInWater > 1 || startingLevel || hooking) return; // Stop the movements
 
     if (mode == Mode.Legs) {
       if (Input.GetKeyDown(KeyCode.Space) && isGrounded == true) {
@@ -218,40 +227,36 @@ public class Controller : MonoBehaviour {
     if ((groundLayer & (1 << collision.collider.gameObject.layer)) != 0) {
       isGrounded = true;
     }
-    if ((waterLayer & (1 << collision.collider.gameObject.layer)) != 0) {
-      Debug.Log("Water");
-    }
-
 
     if ((pillRed & (1 << collision.collider.gameObject.layer)) != 0) {
       phase = Phase.Red;
       bodySR.color = new Color32(255, 100, 100, 255);
       SetLayer(gameObject, 14); // Phase Red
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
     else if ((pillBlue & (1 << collision.collider.gameObject.layer)) != 0) {
       phase = Phase.Blue;
       bodySR.color = new Color32(100, 100, 255, 255);
       SetLayer(gameObject, 15); // Phase Blue
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
     else if ((pillGreen & (1 << collision.collider.gameObject.layer)) != 0) {
       phase = Phase.Green;
       bodySR.color = new Color32(100, 255, 100, 255);
       SetLayer(gameObject, 16); // Phase Green
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
     else if ((itemWheels & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Wheels);
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
     else if ((itemLegs & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Legs);
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
     else if ((itemHook & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Hook);
-      GameObject.Destroy(collision.collider.gameObject);
+      collision.collider.gameObject.SetActive(false);
     }
   }
 
@@ -310,8 +315,56 @@ public class Controller : MonoBehaviour {
     }
   }
 
+  void MoveToLevelStart() {
+    transform.rotation = Quaternion.identity;
+    rb.velocity = Vector3.zero;
+    rb.gravityScale = 1;
+    bodySR.color = new Color32(255, 255, 255, 255);
+    gameObject.layer = 0;
+    ChangeMode(Mode.Wheels);
+    StartCoroutine(MoveToLevelPosition(transform.position, Levels[currentLevel].Start.transform.position));
+  }
 
+  IEnumerator MoveToLevelPosition(Vector3 start, Vector3 end) {
+    startingLevel = true;
+    float pos = 0;
+    float speed = 0;
+    while(pos < 3) {
+      if (pos < 1.5f) 
+        speed += .1f;
+      else speed -= .1f;
+      if (speed < .25f) speed = .25f;
+      pos += speed * Time.deltaTime;
+
+      transform.position = (1 - pos / 3) * start + (pos / 3) * end;
+      yield return null;
+    }
+    // Fade???
+
+    transform.position = Levels[currentLevel].Start.transform.position;
+    yield return null;
+    startingLevel = false;
+  }
+
+  void RestartLevel() {
+    startingLevel = true;
+    // Reset all the items
+    for (int i = 0; i < Levels[currentLevel].Items.Length; i++) {
+      Levels[currentLevel].Items[i].SetActive(true);
+    }
+    MoveToLevelStart();
+  }
 }
 
 public enum Mode { Wheels, Legs, Hook };
 public enum Phase { None, Red, Green, Blue };
+
+[System.Serializable]
+public class Level {
+  public int Number;
+  public GameObject Start;
+  public GameObject End;
+  public GameObject LevelFrame;
+  public GameObject[] Items;
+}
+
