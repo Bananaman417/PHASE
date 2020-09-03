@@ -265,7 +265,7 @@ PrefabInstance:
     - target: {fileID: 1368386701881944466, guid: 317f7cf025fb687498b1030fe339955c,
         type: 3}
       propertyPath: clips.Array.size
-      value: 8
+      value: 9
       objectReference: {fileID: 0}
     - target: {fileID: 1368386701881944466, guid: 317f7cf025fb687498b1030fe339955c,
         type: 3}

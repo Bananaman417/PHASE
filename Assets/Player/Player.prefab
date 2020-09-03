@@ -162,13 +162,16 @@ MonoBehaviour:
     m_Bits: 32768
   itemWheels:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 4194304
   itemLegs:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 2097152
   itemHook:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 1048576
+  phasesLayer:
+    serializedVersion: 2
+    m_Bits: 8192
   phase: 0
   mode: 0
   Legs: {fileID: 1368386702144264866}
@@ -196,6 +199,7 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 19943639225284f4694b27d607dc9d3e, type: 3}
   - {fileID: 8300000, guid: 76a875cf71ce4b9408061133d1ceda8e, type: 3}
   - {fileID: 8300000, guid: 9e44d10e6d198e0459ff3f5ae706523b, type: 3}
+  - {fileID: 8300000, guid: 0688eeeae46557646b70b42c5960f6a7, type: 3}
 --- !u!50 &1368386701881944469
 Rigidbody2D:
   serializedVersion: 4

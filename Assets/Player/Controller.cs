@@ -1,5 +1,4 @@
 ﻿using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class Controller : MonoBehaviour {
@@ -23,6 +22,7 @@ public class Controller : MonoBehaviour {
   public LayerMask itemWheels;
   public LayerMask itemLegs;
   public LayerMask itemHook;
+  public LayerMask phasesLayer;
 
   public Phase phase = Phase.None;
   public Mode mode = Mode.Wheels;
@@ -80,9 +80,9 @@ public class Controller : MonoBehaviour {
           audio1.clip = clips[(int)Sounds.Legs];
         else
           audio1.clip = clips[(int)Sounds.Wheels];
-        if (stopSoundCoroutine != null)
-          StopCoroutine(stopSoundCoroutine);
-        stopSoundCoroutine = null;
+        if (stopSoundCoroutine1 != null)
+          StopCoroutine(stopSoundCoroutine1);
+        stopSoundCoroutine1 = null;
         audio1.volume = 1;
         audio1.Play();
         prevMove = moveinput;
@@ -100,9 +100,9 @@ public class Controller : MonoBehaviour {
           audio1.clip = clips[(int)Sounds.Legs];
         else
           audio1.clip = clips[(int)Sounds.Wheels];
-        if (stopSoundCoroutine != null)
-          StopCoroutine(stopSoundCoroutine);
-        stopSoundCoroutine = null;
+        if (stopSoundCoroutine1 != null)
+          StopCoroutine(stopSoundCoroutine1);
+        stopSoundCoroutine1 = null;
         audio1.volume = 1;
         audio1.Play();
         prevMove = moveinput;
@@ -112,29 +112,38 @@ public class Controller : MonoBehaviour {
       if (moveAnimator != null) {
         moveAnimator.Play("Idle");
       }
-      if (prevMove != 0 && stopSoundCoroutine == null) {
-        stopSoundCoroutine = StartCoroutine(StopSound());
+      if (prevMove != 0 && stopSoundCoroutine1 == null) {
+        stopSoundCoroutine1 = StartCoroutine(StopSound1());
         prevMove = 0;
       }
     }
   }
 
-  Coroutine stopSoundCoroutine = null;
-  IEnumerator StopSound() {
+  Coroutine stopSoundCoroutine1 = null;
+  IEnumerator StopSound1() {
     float volume = 1;
     while (volume > 0) {
       volume -= Time.deltaTime * 3.5f;
       if (volume < 0) volume = 0;
       audio1.volume = volume;
-      audio2.volume = volume;
       yield return null;
     }
     audio1.Stop();
-    audio2.Stop();
     yield return null;
     audio1.volume = 1;
+    stopSoundCoroutine1 = null;
+  }
+  IEnumerator StopSound2() {
+    float volume = 1;
+    while (volume > 0) {
+      volume -= Time.deltaTime * 3.5f;
+      if (volume < 0) volume = 0;
+      audio2.volume = volume;
+      yield return null;
+    }
+    audio2.Stop();
+    yield return null;
     audio2.volume = 1;
-    stopSoundCoroutine = null;
   }
 
 
@@ -292,30 +301,42 @@ public class Controller : MonoBehaviour {
       bodySR.color = new Color32(255, 100, 100, 255);
       SetLayer(gameObject, 14); // Phase Red
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
     else if ((pillBlue & (1 << collision.collider.gameObject.layer)) != 0) {
       phase = Phase.Blue;
       bodySR.color = new Color32(100, 100, 255, 255);
       SetLayer(gameObject, 15); // Phase Blue
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
     else if ((pillGreen & (1 << collision.collider.gameObject.layer)) != 0) {
       phase = Phase.Green;
       bodySR.color = new Color32(100, 255, 100, 255);
       SetLayer(gameObject, 16); // Phase Green
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
     else if ((itemWheels & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Wheels);
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
     else if ((itemLegs & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Legs);
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
     else if ((itemHook & (1 << collision.collider.gameObject.layer)) != 0) {
       ChangeMode(Mode.Hook);
       collision.collider.gameObject.SetActive(false);
+      audio2.clip = clips[(int)Sounds.Pick];
+      audio2.Play();
     }
   }
 
@@ -323,8 +344,12 @@ public class Controller : MonoBehaviour {
     if ((groundLayer & (1 << collision.gameObject.layer)) != 0) {
       isGrounded = true;
     }
-    if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
+    else if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
       inWater = true;
+    }
+    else if ((phasesLayer & (1 << collision.gameObject.layer)) != 0) {
+      audio2.clip = clips[(int)Sounds.Phase];
+      audio2.Play();
     }
   }
 
@@ -332,6 +357,9 @@ public class Controller : MonoBehaviour {
     if ((waterLayer & (1 << collision.gameObject.layer)) != 0) {
       inWater = false;
       timeInWater = 0;
+    }
+    else if ((phasesLayer & (1 << collision.gameObject.layer)) != 0) {
+      StartCoroutine(StopSound2());
     }
   }
 
@@ -427,4 +455,4 @@ public class Level {
   public GameObject[] Items;
 }
 
-public enum Sounds {  Legs=0, Phase=1, Rewwing=2, RopeSwirl=3, Shoot=4, ThumpFsFs=5, Wheels=6, WhipSwing=7 }
+public enum Sounds {  Legs=0, Phase=1, Rewwing=2, RopeSwirl=3, Shoot=4, ThumpFsFs=5, Wheels=6, WhipSwing=7, Pick=8 }
