@@ -52,6 +52,8 @@ public class Controller : MonoBehaviour {
   public AudioSource audio2;
   public AudioClip[] clips;
 
+  public Animator MaskAnimator;
+
   // Start is called before the first frame update
   void Start() {
     cam = Camera.main;
@@ -152,14 +154,22 @@ public class Controller : MonoBehaviour {
     cam.transform.rotation = Quaternion.identity;
     float rz = Mathf.Abs(transform.rotation.eulerAngles.z);
     if (rz > 180) rz = 360 - rz;
-    if (!startingLevel && rz > 60) {
+    if (!startingLevel && rz > 60 || rb.velocity.y < -25) {
       inWater = true;
     }
     if (inWater) {
       timeInWater += Time.deltaTime;
     }
 
-    ElectroShock.SetActive(timeInWater > 1);
+    if (timeInWater > 1) {
+      if (!ElectroShock.activeSelf) {
+        audio1.clip = clips[(int)Sounds.Sparks];
+        audio1.Play();
+      }
+      ElectroShock.SetActive(true);
+    }
+    else
+      ElectroShock.SetActive(false);
     if (timeInWater > 5) { // do some restart
       RestartLevel();
       return;
@@ -448,17 +458,24 @@ public class Controller : MonoBehaviour {
     startingLevel = true;
     float pos = 0;
     float speed = 0;
+    bool faded = false;
     while(pos < 3) {
-      if (pos < 1.5f) 
+      if (pos < 1.5f)
         speed += .1f;
-      else speed -= .1f;
+      else {
+        speed -= .1f;
+        if (!faded) {
+          faded = true;
+          // Fade
+          MaskAnimator.Play("FadeOut");
+        }
+      }
       if (speed < .25f) speed = .25f;
       pos += speed * Time.deltaTime;
 
       transform.position = (1 - pos / 3) * start + (pos / 3) * end;
       yield return null;
     }
-    // Fade???
 
     transform.position = Levels[currentLevel].Start.transform.position;
     yield return null;
@@ -472,6 +489,7 @@ public class Controller : MonoBehaviour {
       Levels[currentLevel].Items[i].SetActive(true);
     }
     MoveToLevelStart();
+    MaskAnimator.Play("FadeIn");
   }
 }
 
@@ -487,4 +505,4 @@ public class Level {
   public GameObject[] Items;
 }
 
-public enum Sounds {  Legs=0, Phase=1, Rewwing=2, RopeSwirl=3, Shoot=4, ThumpFsFs=5, Wheels=6, WhipSwing=7, Pick=8 }
+public enum Sounds {  Legs=0, Phase=1, Rewwing=2, RopeSwirl=3, Shoot=4, ThumpFsFs=5, Wheels=6, WhipSwing=7, Pick=8, Sparks=9 }

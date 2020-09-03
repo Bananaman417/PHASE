@@ -203,6 +203,8 @@ MonoBehaviour:
   - {fileID: 8300000, guid: 76a875cf71ce4b9408061133d1ceda8e, type: 3}
   - {fileID: 8300000, guid: 9e44d10e6d198e0459ff3f5ae706523b, type: 3}
   - {fileID: 8300000, guid: 0688eeeae46557646b70b42c5960f6a7, type: 3}
+  - {fileID: 8300000, guid: 9e5a4714debb9f54ebae5071940c280a, type: 3}
+  MaskAnimator: {fileID: 0}
 --- !u!50 &1368386701881944469
 Rigidbody2D:
   serializedVersion: 4
