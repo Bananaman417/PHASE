@@ -172,6 +172,9 @@ MonoBehaviour:
   phasesLayer:
     serializedVersion: 2
     m_Bits: 8192
+  endLayer:
+    serializedVersion: 2
+    m_Bits: 8388608
   phase: 0
   mode: 0
   Legs: {fileID: 1368386702144264866}

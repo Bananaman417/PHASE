@@ -23,6 +23,7 @@ public class Controller : MonoBehaviour {
   public LayerMask itemLegs;
   public LayerMask itemHook;
   public LayerMask phasesLayer;
+  public LayerMask endLayer;
 
   public Phase phase = Phase.None;
   public Mode mode = Mode.Wheels;
@@ -149,6 +150,11 @@ public class Controller : MonoBehaviour {
 
   void Update() {
     cam.transform.rotation = Quaternion.identity;
+    float rz = Mathf.Abs(transform.rotation.eulerAngles.z);
+    if (rz > 180) rz = 360 - rz;
+    if (!startingLevel && rz > 60) {
+      inWater = true;
+    }
     if (inWater) {
       timeInWater += Time.deltaTime;
     }
@@ -292,29 +298,27 @@ public class Controller : MonoBehaviour {
   float timeInWater = 0;
 
   private void OnCollisionEnter2D(Collision2D collision) {
+    if (startingLevel) return;
     if ((groundLayer & (1 << collision.collider.gameObject.layer)) != 0) {
       isGrounded = true;
     }
 
     if ((pillRed & (1 << collision.collider.gameObject.layer)) != 0) {
-      phase = Phase.Red;
-      bodySR.color = new Color32(255, 100, 100, 255);
+      SetPhase(Phase.Red);
       SetLayer(gameObject, 14); // Phase Red
       collision.collider.gameObject.SetActive(false);
       audio2.clip = clips[(int)Sounds.Pick];
       audio2.Play();
     }
     else if ((pillBlue & (1 << collision.collider.gameObject.layer)) != 0) {
-      phase = Phase.Blue;
-      bodySR.color = new Color32(100, 100, 255, 255);
+      SetPhase(Phase.Blue);
       SetLayer(gameObject, 15); // Phase Blue
       collision.collider.gameObject.SetActive(false);
       audio2.clip = clips[(int)Sounds.Pick];
       audio2.Play();
     }
     else if ((pillGreen & (1 << collision.collider.gameObject.layer)) != 0) {
-      phase = Phase.Green;
-      bodySR.color = new Color32(100, 255, 100, 255);
+      SetPhase(Phase.Green);
       SetLayer(gameObject, 16); // Phase Green
       collision.collider.gameObject.SetActive(false);
       audio2.clip = clips[(int)Sounds.Pick];
@@ -341,6 +345,7 @@ public class Controller : MonoBehaviour {
   }
 
   private void OnTriggerEnter2D(Collider2D collision) {
+    if (startingLevel) return;
     if ((groundLayer & (1 << collision.gameObject.layer)) != 0) {
       isGrounded = true;
     }
@@ -350,6 +355,11 @@ public class Controller : MonoBehaviour {
     else if ((phasesLayer & (1 << collision.gameObject.layer)) != 0) {
       audio2.clip = clips[(int)Sounds.Phase];
       audio2.Play();
+    }
+    else if ((endLayer & (1 << collision.gameObject.layer)) != 0) {
+      currentLevel++;
+      RestartLevel();
+      // FIXME we should check if we have more levels
     }
   }
 
@@ -392,7 +402,27 @@ public class Controller : MonoBehaviour {
       moveSR1 = wheelsSR1;
       moveSR2 = wheelsSR2;
     }
+    SetPhase(phase);
   }
+
+  void SetPhase(Phase p) {
+    phase = p;
+    switch(p) {
+      case Phase.None:
+        bodySR.color = new Color32(255, 255, 255, 255);
+        break;
+      case Phase.Red:
+        bodySR.color = new Color32(255, 100, 100, 255);
+        break;
+      case Phase.Blue:
+        bodySR.color = new Color32(100, 100, 255, 255);
+        break;
+      case Phase.Green:
+        bodySR.color = new Color32(100, 255, 100, 255);
+        break;
+    }
+  }
+
 
   void SetLayer(GameObject obj, int newLayer) {
     obj.layer = newLayer;
@@ -406,7 +436,9 @@ public class Controller : MonoBehaviour {
     transform.rotation = Quaternion.identity;
     rb.velocity = Vector3.zero;
     rb.gravityScale = 1;
-    bodySR.color = new Color32(255, 255, 255, 255);
+    inWater = false;
+    timeInWater = 0;
+    SetPhase(Phase.None);
     gameObject.layer = 0;
     ChangeMode(Mode.Wheels);
     StartCoroutine(MoveToLevelPosition(transform.position, Levels[currentLevel].Start.transform.position));
