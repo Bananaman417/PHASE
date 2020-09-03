@@ -47,7 +47,8 @@ public class Controller : MonoBehaviour {
   public int currentLevel = 0;
   bool startingLevel = false;
 
-  public AudioSource audio;
+  public AudioSource audio1;
+  public AudioSource audio2;
   public AudioClip[] clips;
 
   // Start is called before the first frame update
@@ -74,16 +75,16 @@ public class Controller : MonoBehaviour {
       if (moveAnimator != null) moveAnimator.Play("MoveL");
       if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + 90);
       goingleft = true;
-      if (!audio.isPlaying) {
+      if (!audio1.isPlaying) {
         if (mode == Mode.Legs)
-          audio.clip = clips[(int)Sounds.Legs];
+          audio1.clip = clips[(int)Sounds.Legs];
         else
-          audio.clip = clips[(int)Sounds.Wheels];
+          audio1.clip = clips[(int)Sounds.Wheels];
         if (stopSoundCoroutine != null)
           StopCoroutine(stopSoundCoroutine);
         stopSoundCoroutine = null;
-        audio.volume = 1;
-        audio.Play();
+        audio1.volume = 1;
+        audio1.Play();
         prevMove = moveinput;
       }
     }
@@ -94,16 +95,16 @@ public class Controller : MonoBehaviour {
       if (moveAnimator != null) moveAnimator.Play("MoveR");
       if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45);
       goingleft = false;
-      if (!audio.isPlaying) {
+      if (!audio1.isPlaying) {
         if (mode == Mode.Legs)
-          audio.clip = clips[(int)Sounds.Legs];
+          audio1.clip = clips[(int)Sounds.Legs];
         else
-          audio.clip = clips[(int)Sounds.Wheels];
+          audio1.clip = clips[(int)Sounds.Wheels];
         if (stopSoundCoroutine != null)
           StopCoroutine(stopSoundCoroutine);
         stopSoundCoroutine = null;
-        audio.volume = 1;
-        audio.Play();
+        audio1.volume = 1;
+        audio1.Play();
         prevMove = moveinput;
       }
     }
@@ -124,12 +125,15 @@ public class Controller : MonoBehaviour {
     while (volume > 0) {
       volume -= Time.deltaTime * 3.5f;
       if (volume < 0) volume = 0;
-      audio.volume = volume;
+      audio1.volume = volume;
+      audio2.volume = volume;
       yield return null;
     }
-    audio.Stop();
+    audio1.Stop();
+    audio2.Stop();
     yield return null;
-    audio.volume = 1;
+    audio1.volume = 1;
+    audio2.volume = 1;
     stopSoundCoroutine = null;
   }
 
@@ -180,6 +184,9 @@ public class Controller : MonoBehaviour {
       notgood = true;
     }
 
+    audio1.clip = clips[(int)Sounds.Shoot];
+    audio1.Play();
+
     // Start elongating anim until we reach the spot
     float hooklen = .2f;
     while (hooklen < dist * hookscale) {
@@ -189,6 +196,8 @@ public class Controller : MonoBehaviour {
     }
 
     if (notgood) {
+      audio2.clip = clips[(int)Sounds.Rewwing];
+      audio2.Play();
       // If no spot, then go back and stop
       while (hooklen > .2) {
         hooklen -= 3 * Time.fixedDeltaTime;
@@ -221,6 +230,8 @@ public class Controller : MonoBehaviour {
         yield return null;
       }
 
+      audio2.clip = clips[(int)Sounds.RopeSwirl];
+      audio2.Play();
       // Swing
       if (goingleft) {
         pos = 10;
@@ -252,6 +263,8 @@ public class Controller : MonoBehaviour {
       }
 
       // Leave the hook, and fall down
+      audio1.clip = clips[(int)Sounds.Rewwing];
+      audio1.Play();
       yield return new WaitForSeconds(.05f);
       rb.gravityScale = 1;
       pos = 0;
