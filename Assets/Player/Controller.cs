@@ -47,6 +47,9 @@ public class Controller : MonoBehaviour {
   public int currentLevel = 0;
   bool startingLevel = false;
 
+  public AudioSource audio;
+  public AudioClip[] clips;
+
   // Start is called before the first frame update
   void Start() {
     cam = Camera.main;
@@ -58,6 +61,7 @@ public class Controller : MonoBehaviour {
     MoveToLevelStart();
   }
 
+  float prevMove = 0;
   void FixedUpdate() {
     if (timeInWater > 1 || hooking || startingLevel) return; // Stop the movements
     moveinput = Input.GetAxis("Horizontal");
@@ -70,6 +74,18 @@ public class Controller : MonoBehaviour {
       if (moveAnimator != null) moveAnimator.Play("MoveL");
       if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45 + 90);
       goingleft = true;
+      if (!audio.isPlaying) {
+        if (mode == Mode.Legs)
+          audio.clip = clips[(int)Sounds.Legs];
+        else
+          audio.clip = clips[(int)Sounds.Wheels];
+        if (stopSoundCoroutine != null)
+          StopCoroutine(stopSoundCoroutine);
+        stopSoundCoroutine = null;
+        audio.volume = 1;
+        audio.Play();
+        prevMove = moveinput;
+      }
     }
     else if (moveinput > 0) {
       if (bodySR != null) bodySR.flipX = false;
@@ -78,14 +94,44 @@ public class Controller : MonoBehaviour {
       if (moveAnimator != null) moveAnimator.Play("MoveR");
       if (mode == Mode.Hook) Hook.transform.rotation = Quaternion.Euler(0, 0, 45);
       goingleft = false;
+      if (!audio.isPlaying) {
+        if (mode == Mode.Legs)
+          audio.clip = clips[(int)Sounds.Legs];
+        else
+          audio.clip = clips[(int)Sounds.Wheels];
+        if (stopSoundCoroutine != null)
+          StopCoroutine(stopSoundCoroutine);
+        stopSoundCoroutine = null;
+        audio.volume = 1;
+        audio.Play();
+        prevMove = moveinput;
+      }
     }
     else {
       if (moveAnimator != null) {
         moveAnimator.Play("Idle");
       }
+      if (prevMove != 0 && stopSoundCoroutine == null) {
+        stopSoundCoroutine = StartCoroutine(StopSound());
+        prevMove = 0;
+      }
     }
   }
 
+  Coroutine stopSoundCoroutine = null;
+  IEnumerator StopSound() {
+    float volume = 1;
+    while (volume > 0) {
+      volume -= Time.deltaTime * 3.5f;
+      if (volume < 0) volume = 0;
+      audio.volume = volume;
+      yield return null;
+    }
+    audio.Stop();
+    yield return null;
+    audio.volume = 1;
+    stopSoundCoroutine = null;
+  }
 
 
   void Update() {
@@ -368,3 +414,4 @@ public class Level {
   public GameObject[] Items;
 }
 
+public enum Sounds {  Legs=0, Phase=1, Rewwing=2, RopeSwirl=3, Shoot=4, ThumpFsFs=5, Wheels=6, WhipSwing=7 }
